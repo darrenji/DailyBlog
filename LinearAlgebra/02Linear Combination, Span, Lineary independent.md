@@ -16,7 +16,7 @@
 
 那为什么说是线性Linear呢？而不说成曲线组合呢？
 
-想象一下，两个向量相加，保持一个向量不懂，另外一个向量的标量scaler不断变化，两者相加得到的新向量的终点可以连成一条线，所以就是线性了。
+想象一下，两个向量相加，保持一个向量不动，另外一个向量的标量scaler不断变化，两者相加得到的新向量的终点可以连成一条线，所以就是线性了。
 
 如果两个向量同时缩放并相加呢？这样就可以得到一个平面上所有`Linear combination`的组合，而这些组合就叫做`span`或者`张成空间`。
 
@@ -26,4 +26,4 @@
 
 最后就是一句描述向量空间的话来结尾：
 
-> The basis of a vector pace is a set of lineary independent vectors that span full space.
+> The basis of a vector space is a set of lineary independent vectors that span full space.
