@@ -33,11 +33,11 @@
 
 左边的这排代表着空间坐标系下的trasformed i,右边的这排代表着空间坐标系下的transformed j。而所有的`线性转换Linear Transform`都可以在`矩阵Matrix`基础上转换得来。
 
-而所有的`线性转换linear transform`可以抽象成如下：
+所有的`线性转换linear transform`可以抽象成如下：
 
 ![3-6](https://github.com/darrenji/DailyBlog/blob/master/LinearAlgebra/36.gif)
 
-总结一下就是：在二维空间里的i head和j head, 首先翻转一下，即通过`Linear Trasform`，这个二维平面得到transformed i head和trasnformed j，这个transformed i和trasformed j head组成了`矩阵Matrix`，`矩阵Matrix`就是在三维坐标下的基本单元，然后通过`线性组合Linear Combination`得到了空间中的一个新向量。所以，也可以这么说：三维空间是由`矩阵Matrix`通过`线性组合Linear Combination`形成的。
+总结一下就是：在二维空间里的i head和j head, 首先翻转一下，即通过`Linear Trasform`，这个二维平面得到transformed i head和trasnformed j head，这个transformed i head和trasformed j head组成了`矩阵Matrix`，`矩阵Matrix`就是在三维坐标下的基本单元，然后通过`线性组合Linear Combination`得到了空间中的一个新向量。所以，也可以这么说：三维空间是由`矩阵Matrix`通过`线性组合Linear Combination`形成的，二维空间是由i head和j header通过`线性组合Linear Combination`形成的
 
 
 
