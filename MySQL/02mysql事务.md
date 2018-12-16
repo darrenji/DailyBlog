@@ -96,3 +96,20 @@ select * from information_schema_innodb_trx where TIME_TO_SEC(timediff(now(),trx
 ```
 
 > 事务是用来解决复杂操作的，当事务多的时候先指定一些规则，也就是隔离策略会让事情变得简单一些，然后在实现各个隔离策略的时候，有时候需要把状态保存下来。
+
+> 避免常事务造成的不好影响
+
+1、应用端：把不必要的事务去掉，避免单个语句执行太长，把自动提交关掉。
+
+```
+Set autocommit=1;
+Set MAX_EXECUTION_TIME
+```
+
+
+2、数据库端：设置事务的阙值，设置回滚的粒度。
+
+```
+infomation_schema.Innodb_trx表
+innodb_udo_tablespaces 
+```
