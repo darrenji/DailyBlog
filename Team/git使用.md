@@ -342,3 +342,307 @@ git仓库备份到本地
 	id_rsa.pub公钥，放在共网
 拷贝公钥到https://github.com/settings/keys	
 ```
+
+gighub创建个人仓库，把本地同步到远端
+```
+选择Owner,可以是组织或个人
+勾选Initialize this repository with a README，这里的描述和github搜索相关
+.gitignore,可以选择某个模板
+协议，比如MIT License属于免费分享(这个文件在本地还没有哦)
+查看remote:git remote -v
+删除分支：git remote remove 分支名称
+添加远程地址：git remote add 名称 git@github.com:git.....git
+git remote -v
+把本地所有的分支上传到远程：git push 名称 --all
+	![rejected] master-->master(fetch first)
+	error:failed to push some refs to 'git@github.com:git.../git_example.git'
+	也就是没有基于远端作变更
+gitk --all
+	如果分支已经成功同步到远端：remote/名称/分支名
+	由于远端预先创建了license文件，所有远端没有：remote/master
+现在远端的master分支有问题，先把远端master分支fetch下来：git fetch 名称 master(git pull包含两个动作，fetch+merge)
+gitk --all
+	多出了remote/名称/master, 里面有远端预先创建的licence文件
+	本地的master
+    现在要解决不是fast-farward的问题，有两种解决方式：rebase或者merge
+查看本地分支：git branch -v
+查看本地和远端分支：git branch -va
+切换到master分支：git checkout master
+本地的master和远端master合并：git merge 远端名称/master(这样写不行：远端名称 master)
+	fatal:refusing to merge unrelated histories,也就是本地的master和远端的master不相干，是两个独立的树
+查看merge命令，git merge -h 
+再来忽略历史的一个merge命令：git merge --allow-unrelated-histories 远端名称/master
+gitk --all
+现在远端和本地已经merge了，把本地的Push: git push 远端名称 master(本地的master分支)
+gitk --all
+	这时本地的master和远端的master都指向同一个commit了：master--remotes/远端名称/master
+
+总结一下：
+git remote -v
+git remote remove remote_name
+git remote add remote_name(远端默认名称是origin) ...
+git remote -h
+gitk --all
+git branch -v
+git branch -va
+git checkout master
+git fetch remote_name master
+git merge --allow-unrelated-histories remote_name/master
+git push remote_name master
+```
+
+在同一个分支中，不同人修改不同文件
+```
+在github上创建分支：feature/add_git_commands,在切换分支处输入名称回车即可
+在本地clone一个：git clone git@github.com:darrenji/git_learning.git git_learning_02
+ls -al
+修改新创建文件夹git_learning_02里本地用户：git config --add --local user.name 'git2019' 
+查看本地配置：git config --local -l
+git config --add --local user.email 'git2019@qq.com'
+git config --local -l
+	如果要修改配置文件：vi .git/config, i, esc, :wq!
+查看所有分支：git branch -av
+基于远端的分支创建本地分支并切换到本地新创建分支：git checkout -b feature/add_git_commands origin/feature/add_git_commands
+git branch -v
+vi index.html, i, esc, :wq!
+git add -u 
+git commit -m 'update index by git2019'
+git push (feature/add_git_commands-->add_git_commands)(因为创建本地分支的时候和远端的分支挂钩了起来，并且现在本地在刚创建的新分支上)(git push origin feature/add_git_commands)
+回到原先的git_learning
+git config --local -l
+查看所有的分支，git branch -av，发现刚刚创建的分支还没到这里的本地
+查看远端的名称：git remote -v
+把远端fetch下来：git fetch gitlearing
+	*[new branch] feature/add_git_commands -> gitlearing/feature/add_git_commands
+git branch -v发现远端的新分支在本地还是没有
+git branch -av用这个名利是可以看到远端的新分支的
+现在要创建本地分支：git checkout -b feature/add_git_commands gitlearing/feature/add_git_commands
+bit branch -av现在本地已经有远端新创建的分支了，而且本地和远端新创建分支的hash值是一样的
+vi styles/style.css, i, esc, :wq!
+git add -u
+git commit -m 'update styles.css by darren'
+gitk --all,发现本地的feature/add_git_commands和reotes/gitlearing/feature/add_git_commands是fast foward关系
+	这时另一个用户又想修改
+来到git_learning_02
+git branch -av
+vi index.html,i, esc, :wq!
+git commit -am 'update second time by git2016'
+git push
+再次来到git_learning文件夹，cd .. | cd git_learning
+git branch -av 此时git_learning这个用户不知道远端又作了变更
+git push gitlearing
+	Updates were rejected because the remote contains work that you do not have locally. This is usually caused by another repository push to the same ref.You may want to first intergrate the remote changes before pushing again.
+先把远端fetch下来：git fetch gitlearing
+git branch -av
+	本地分支feature/add_git_commands hash_code [ahead 1, behind 1]，是说本地分支有一个比远端新，有一个比远端旧
+git merge gitlearing/feature/add_git_commands,因为两个用户修改的是不同文件，对git来说很容易解决
+git push gitlearing
+```
+
+不同的人修改同一个文件的相同区域
+```
+来到git_learning_02文件夹
+git branch -av 查看所有分支和当前分支
+git pull(fetch+merge)
+vi index.html
+git commit -am 'add by git2019 again',注意这里还没有push
+来到git_learning文件夹
+vi index.html
+git commit -am 'add by darren again'
+git push gitlearing
+来到git_learning_02文件夹
+git push
+	failed to push some refs to ...updates were rejected
+git fetch
+查看分支情况：git branch -av
+	feature/add_git_commands  hash_code[ahead 1 behind 1]
+	remotes/origin/feature/add_git_commands hash_code add by darren again.
+git merge origin/feature/add_git_commands
+	auto-merging index.html
+	CONFLICT(content):Merge conflict in index.html
+	Automatic merge failed; fix conflics and then commit the result
+手动修改index.html文件
+cat index.html
+git status
+git commit -am 'resolve commit by git2019'
+git push
+来到git_learning文件夹
+git pull gitlearing
+```
+
+不同的人修改同一个文件的不同区域。
+```
+来到git_learning_02文件夹
+git branch -av
+git pull 保证和远端保持更新
+gi branch -av
+vi index.html
+git commit am 'git2019 in one area' 注意这里还没有push
+来到git_learning文件夹
+vi index.html
+git commit am 'darren in this area'
+git push gitlearing这时，git2019还不知道这里已经有了push
+来到git_learning_02文件夹
+git push
+	error:failed to push some refs to 
+    也就是现在的状态不是fast forward
+git fetch 此时fetch下来还没有merge
+git branch -av
+	feature/add_git_commands [ahead 1, behind1]ahead是因为这里提交还没有push,behind是因为darren用户提交到远端的这里还没有同步过来
+git merge origin/feature/add_git_commands
+直接进入index.html手动修改
+cat index.html
+gitk --all
+git branch -av
+git status
+git commit -am 'resolve'
+git branch -av 
+	feature/add_git_commands [ahead 2]就是比远端还领先，可以git push
+git push
+git branch -av 发现feature/add_git_commands没有ahead,behind了，local和remote的分支的hash_code一样
+来到git_learning文件夹
+git pull gitlearing
+cat index.html
+```
+
+同时变更了文件名和文件内容。
+```
+来到git_learning文件夹
+git branch -av
+git pull gitlearing
+来到git_learning_02文件夹
+git pull
+来到git_learning文件夹
+ls -al
+git mv index.html index.htm
+git status
+git commit -am 'change index name'
+来到git_learning_02文件夹
+ls -al
+vi index.html
+git commit -am 'modify index title'
+来到git_learning文件夹
+git push gitlearing
+来到git_learning_02文件夹
+git push
+	error:failed to push some refs
+git pull
+	unix窗口,这里看到了git的神奇之处，它能把index.html的改名和内容更改merge成一步
+ls -al
+	文件名已经变成了inex.htm
+cat index.htm
+```
+
+多人修改了文件名
+```
+来到git_learning文件夹
+git pull
+来到git_learning_02文件夹
+git pull
+ls -al
+git mv index.htm index1.htm
+git commit -m 'change index to index1'
+来到git_learning文件夹
+ls -al
+git mv index.html index2.html
+git commit -am 'change index to index2'
+来到git_learning_02文件夹
+git push
+	error:failed to push some refs to
+git pull
+	Automatic merge failed;fix conflicts and then commit the result.
+ls -al
+	index1.html
+	index2.htm
+diff index.html index2.htm
+git status
+	both deleted:index.htm
+	added by us: index.html
+	added by them: index2.htm
+git rm index.htm
+git status
+	added by us: index1.html
+	added by them: index2.htm
+git add index1.html
+git status
+	added by them:index2.htm
+git rm index2.htm
+git status
+	Your branch and 'origin/feature/add_git_commands' have diverged,
+	and hav 3 and 1 different commits each, respectively.
+	(use "git pull" to merge the remote branch into yours)
+	All conflicts fixed but you are still merging
+	(use "git commit" to conclude merge)
+git commit -am 'Decide to mv index to index1'
+git status
+gitk --all
+git branch -av
+	[ahead 4]
+git push
+ls -al
+这时github上也是index1.html
+```
+
+fastforward和non-fastforward
+```
+假设远端的名称是ariya
+现在为远端创建分支：git checkout -b speedup
+
+现在先fetch后merge，默认使用的是fast-forward模式，会删除speedup分支然后合并到master分支上。这种做法适合master和合并commit之间没有master的commit.
+git fetch ariya
+git merge ariya/speedup
+
+还有一种情况是，保持分支不动，当master和合并commit之间有commit，或者想故意保留其它branch。
+git fetch ariya
+git merge -no-ff ariya/speedup
+```
+
+禁止向集成分支执行push-f操作
+```
+来到git_learning_02文件夹
+git branch -av
+git log --oneline
+现在把当前分支的HEAD指向master HEAD指向commit之前的某个分支：git reset --hard 5a7e69b,这样当前分支上5a7e69b之前的commit都没有了，本地没有了
+推到远端强制同步：git push -f， 也就时不采用fast-forward模式了
+此时github上,feature/add_git_commands分支上的commit少了很多，这在团队开发中会产生不好的影响
+实际上在github上是可以设置不能进行git push -f操作的
+```
+
+merge和rebase。
+```
+场景：从master的某个commit开始多处了一个branch叫做Feature,然后这个Feature分支不断地有commit,Master分支也不断有commit.
+
+Merge
+git checkout Feature
+git merge master
+或者
+git merge Feature master
+这样Feature分支上有了master分支的历史，有时看起来比较混乱
+
+Rebase
+git checkout Feature
+git rebase master
+这样master作为基，Feature接着master，就会得到一个新的、线性的commits
+
+如果rebase的时候想控制Feature上的commits呢？
+git checkout Feature
+git rebase -i master
+	pick 33d5b7a Message for commit #1
+	pick 9480b3d Message for commit #2
+	pick 5c67e61 Message for commits #3
+
+	pick 33d5b7a Message for commit #1
+	fixup 9480b3d Message for commit #2
+	pick 5c67e61 Message for commits #3
+	
+注意：不要在公共分支上使用rebase,因为，rebase后push产生新的分支，已经脱离了原来的master,而其它开发者还在master分支。
+
+rebase后的push:
+rebase后使用git push命令是不行的，需要使用：git push --force
+
+虽然rebase需要在公共分支上禁止使用或者慎用，但是在作本地清理中很有用。
+比如各项功能有各个分支。
+rebase就可以在分支之间或者分支上的commit之间用上。
+git checkout Feature
+git rebase -i HEAD~3
+```
