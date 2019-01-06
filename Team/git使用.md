@@ -646,3 +646,202 @@ rebase就可以在分支之间或者分支上的commit之间用上。
 git checkout Feature
 git rebase -i HEAD~3
 ```
+
+搜索
+```
+https://github.com/search
+https://help.github.com/
+created:>2019-01-01
+git 最好 学习 资料 in:readme
+blog easily start in:readme stars:>5000
+git 最好 学习 资料 in:readme stars:>1000
+filename:.gitlab-ci.yml
+```
+
+组织性仓库
+```
+Settings--Organizations 
+Organization组织的概念
+Organization有People管理
+Organization有Repositories
+Organization有Team管理
+	Team下有Member管理,Member相当于用户
+    Team管理哪些仓库，对仓库的读写权限
+	Team下有角色，角色管理哪些仓库，对仓库有哪些读写权限
+	一个新的Member进来没有写权限但又读权限，可以看到Team, Member， Repository等
+```
+
+创建团队项目
+```
+create a new repository
+	owner,Repository name, Description, public, ignore
+	Grant your Marketplace apps access to this repository,勾选以前用过的持续化集成CI或者代码覆盖率的的Marketplace上的服务
+Settings-Collaborators & teams
+	设置Team的权限
+```
+
+选择团队工作流
+```
+考虑的因素：人员组成、研发能力、产品特征是云平台还是APP、难易程度
+主干开发：适用于成员能力强，人员少，沟通顺畅，用户升级组件成本低，有一套有效的特征切换的实施机制，保证上线后无需修改代码就能够修改系统行为，需要快速迭代，想获得CI/CD的所有好处。
+Git Flow:不太适合敏捷开发团队，不具备主干开发能力，有预定的开发周期，需要执行严格的发布流程。
+GitHub Flow:不具备主干开发能力，随时集成随时发布，分支集成时经过代码评审和自动化测试，就可以立即发布的应用。
+GitLab Flow:有Master和Production分支，不具备主干开发能力，无法控制准确的发布时间，但又要求不停地集成。
+GitLab Flow带环境分支：Master, Pre-Production, Production分支，不具备主干开发能力，需要逐个通过各个测试环境的验证才能发布。
+GigLab Flow带发布分支：Master分支，同一个分支有多个版本，比如设备不太变，软件一直在变，可以用一个master多个分支，多个分支会长期存在。
+```
+
+分支分集成策略
+```
+Insights--Network,看到各个分支的发展情况
+settings--Options--Merge button
+	Allow rebase merging:希望master是一条清晰的线性线，每一次特性分支合并到master都让master最新的Head作为rebase,最后可以把特性分支删除。
+Pull requests--New pull request
+选择master和特性分支，特性分支指向master分支
+Create pull request按钮
+	Merge pull request,提交后，还提供删除按钮
+Insights--Network,现在可以看到当把特性分支merge到master的时候，会创建一个新的commit
+以上通过Merge pull request完成了特性分支和master的merge,并在master分支上多了一个commit。
+
+现在需要回退
+git branch -av
+	发现工作在master分支上
+git push -f orgin master实际不允许这样做，不允许回退
+	这样Insights--Network中的master回到了merge之前的commit
+
+Squash and merge,把特性分支上的几个commit squash成一个commit,再放到master上去
+在master上会多出一个新的commit
+
+Rebase and merge,特性分支上的所有commit会加到master分支的最前面。
+
+总结：
+rebase and merge, squash and merge适合线性
+merge适合很多分支的merge
+```
+
+issue跟踪需求、任务、Bug
+```
+在Settings里启用，设置模板
+label
+有几个简单的状态
+可以@某个人或团队
+```
+
+project看板管理issue和pull requst
+```
+Project--Create a prject
+把Issue可以放到projects
+可以把todo拖动不同的区域
+```
+
+CodeReview:不允许未经review的代码集成到分支
+```
+Settings--Branches--Branch protection rule--Add rule
+```
+
+多分支集成
+```
+pull request,选择某个特性分支合并到master分支
+选择create a merge commit,看到紫色背景说明提交pull request成功了
+在Insights的Networking中看效果,master分支上多一个一个commit,这个commit有两个父亲，一个是master上它的上一个节点，一个是特性分支上的上一个节点。master上的新commit叫merged commit。
+
+另外一个特性分支也提交pull request，发现冲突，点击解决， mark as resolved,注意这里的解决冲突是在当前分支中解决的，即把master分支merge到了当前的分支中，这时特性分支和master分支属于fast forward关系了,即master在特性分支的最前面，即特性分支又向前走了一个commit
+
+另一个分支继续提交pull request,选择create a merge commit,特性分支再次与master合并，master分支又向前了一个commit，
+
+现在master分支需要强制回退，git push -f origin b3bf033:master(实际场景不推荐)
+另一个特性分支也需要强制回退，git push -f origin 6ac0f:另一个特性分支名称(实际场景不推荐)
+
+
+一个特性分支使用squash的方式提交pull request。
+把特性分支上的多个commit合并成一个再与master分支合并，master分支多了一个新的commit,特性分支不变。
+另一个特性分支也使用squash的方式提交pull request,解决冲突，marked as resolved, commit merge。因为是在另一个特性分支上解决冲突的，所有master分支被拉到另一个特性分支上来，另一个特性分支又向前走一步多了一个新的commit。点击Squash and merge,上次使用merge方式的话，会在master分支上多一个新的commit并指向另一个特性分支的最后一个commit，但是现在变了，master分支上也多出了一个新的commit，但是这个commit并不指向另一个特性分支。
+
+再来看看rebase的情况。
+一个特性分支采用rebase的方式提交pull request,特性分支上的所有commit会放到master分支的最前面，master原来的commit变成rebase的基点了，而且当前特性分支和master分支是fast forward关系，因为当前分支最老的那个commit的父commit是master分支上的最前面节点，所有rebase合并后一点问题都没有。
+另一个特性分支也想合并到master分支上，解决冲突，master会和另一个特性分支合并，在另一个特性分支上多了一个新的合并commit。提交rebase方式的pull request。github就无法再进行下去的。另一个特性分支回退：git branch -av;git push -f origin 远程分支名称。
+
+rebase放在本地做，方法一：
+把远端拉下来：git fetch origin
+git branch -av
+现在另一个特性分支需要基于远端orgin/master做rebase:git rebase origin/master
+找到冲突的文件：解决冲突
+把刚才解决完冲突的文件放入staged cache:git add .
+git rebase --continue,还会有冲突，继续解决
+git add .
+git rebase --continue,还会有冲突，继续解决
+git add .
+git rebase --continue
+gitk --all也就是本地的分支已经完成rebase了
+git push origin 远端另一个特性分支名称，报错，不是fast forward
+git push -f origin 远端另一个特性分支名称,多出了新的分支，分支上包括所有另一个特性分支上的commit
+通过rebase方式重新提交pull request,master分支上又多出了新分支上的所有commit，但是master的Head并没有指向新分支的最新一个commit。原本新的分支和master分支是fast forward关系，即新的分支的第一个commit从master的最新一个commit开始，可是为什么master的HEAD不直接指向新分支的最新一个commit(因为如果这样做，就会把谁合并提交的信息丢掉了),而是在master上又向前了一步，把新分支所有的commit放到了master上呢？而且看项目的commit，可以看到commit的author和committer,author是原先的作者，版权属于他，commiter是刚才合并提交的账号。
+
+rebase放在本地做，方法二：先让另一个特性分支和master分支合并，并解决冲突
+git branch -av
+git reset --hard origin/s回到远端另一个特性分支的commit
+git branch -av
+git checkout master
+git reset --hard hash_code
+git config --global rerere.enabled true
+git checkout 另一个特性分支
+git merge master
+解决冲突
+git add .
+git commit -m ''
+git log -n3
+git rest --hard HEAD~1
+git log -n3
+gitk --all
+git branch -av
+现在另一个特性分支需要和远端rebase:git rebase hash_code,内部知道怎样解决冲突，已经解决冲突了
+git rebase --continue
+git add some_conflict_file
+git rebase --continue
+git add --some_conflict_file
+git rebase --continue
+git add --some_conflict_file
+git rebase --continue
+```
+
+怎样保证集成的质量
+```
+禁止branch提交：Settings--Branches
+勾选Require status checks to pass before merging
+勾选Reqire branches to be up to date before merging
+勾选Market place上的持续化集成、代码覆盖率等服务
+Settings--Installed GitHub Apps
+```
+
+怎样把产品发布到github上，以二进制发到github
+```
+.travis.yml配置
+Settings--Integrations & Services
+找到集成服务跳转过去
+有一个token在setting--token中取
+merge到master分支
+release下面有包和soure code.
+```
+
+给项目增加详细文档wiki
+```
+把别人写得好的wiki放到自己的git上修改学习
+git remote -v
+gitk --all
+git branch -av
+git reset --hard  hash_code
+git push second master
+git branch -av
+```
+
+为什么喜欢GitLab?
+```
+自管理git,公司自维护代码平台
+基于ruby on rails
+有些人还会做二次开发
+GitLab上有几千人维护，世界上任何一个角落的人可以修改GitLab
+不停地有新功能加进来
+自己搭建环境
+没有使用壁垒
+CI发展很快，很稳定
+```
