@@ -14,9 +14,9 @@
 
 所谓的循环是指最后一个节点的指针指向了第一个节点。所谓的双向是指一个节点中有2个指针，一个指针指向前面一个节点，另一个指针指向后面一个节点。
 
-> 链表在缓存策略中的应用。缓存策略中，有一种叫做“LRU缓存策略”，即Least Recently Used,把最近使用到的放在缓存列表的头部。
+> 链表在缓存策略中的应用。缓存策略中，有一种叫做“LRU缓存策略”，即Least Recently Used,把最近使用到的放在缓存列表的头部。当缓存满的时候最先清除头部的结点。
 
-这个缓存策略中维护者所有的节点、第一个节点、最后一个节点、已经容量。
+这个缓存策略中维护着所有的节点、第一个节点、最后一个节点、以及容量。
 
 ```
 
@@ -24,8 +24,8 @@
     {
         private int _capacity;
         private Dictionary<int, Node> data;
-        private Node head;
-        private Node end;
+        private Node head; //声明特殊结点头部
+        private Node end;//声明特殊结点尾部
 
         public LRUCache(int capaicity)
         {
@@ -69,6 +69,7 @@ public class Node
             this.head = node;
         }
 ```
+别小看这简单的插入操作，很有意思。首先插入的时候把结点的前后两个指针重置为null。然后考虑边界条件，即插入的时候链表中还没有结点。最后原先head的previous指针指向新插入的结点，新插入的结点的next指针指向head,最后把包装类中的head指向新插入的结点，或者把新插入的结点复制给管理类中的head。
 
 然后是删除节点。考虑删除节点是否为null,head节点是否为null, 如果剩下最后一个节点，如果删除head节点，如果删除end节点，最后就是删除head和end之间的节点了。
 
