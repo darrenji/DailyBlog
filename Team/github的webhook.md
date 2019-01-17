@@ -1,0 +1,1 @@
+当希望github上的动作和工作项关联，可以使用github的[Webhooks](https://developer.github.com/webhooks/ "Webhooks")。Webook可以用来更新外部跟踪、触发CI构建、更新备份镜像，甚至可以部署到生产服务器。Webhook可以被安装到企业所有的repository或者被安装到某个repository。一旦被安装，当订阅的事件发生，Webhook就被触发。只有被订阅的事件发生Webhook才会被触发，才会向外部服务器发送HTTP请求。
