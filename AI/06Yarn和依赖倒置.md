@@ -1,0 +1,23 @@
+在Hadoop中的三驾马车，HDFS分布式文件系统，Yarn资源调度框架，MapReduce计算框架。
+
+在Hadoop 1.0时代的问题：JobTracker进程和TaskTracker进程互相通信，资源的调度和MapReduce的计算过程耦合在一起了，比如再增加一个计算框架，难道也要为新的计算框架部署服务器集群吗？于是就分离出一个调度层，就是Yarn, Yet Another Resource Negotiator，Yarn就负责把一些规范写好，MapReduce计算框架或者其他框架都可以实现这些规范，这里就体现依赖倒置了，本来Yarn需要依赖低层的MapReduce框架和其它计算框架，是强耦合关系，现在不想让Yarn这个高层模块依赖低层模块，Yarn只定义怎么实现，依赖某个抽象的接口，具体实现交给低层的MapReduce计算框架或者其它计算框架，从依赖低层到依赖抽象接口，完成了依赖倒置。
+
+
+Yarn长啥样？Yarn框架中有一个资源管理器Resource Manager部署在单独服务器上，然后节点管理器部署在服务器集群的Node Manager上，通常和DataNode在一台服务器上，Resource Manager和NodeManager之间保持着通信。Resource Manager资源管理器上包括调度器和应用程序管理器。调度器实际是资源分配算法，决定如何把应用程序分发到服务器集群中去，通常的算法有Fair Scheduler和Capacity Scheduler，还可以定义自己的算法。应用程序管理器，用来接收应用程序的提交和监控管理。
+
+Yarn如何工作呢？
+
+- Yarn接收MapReduce ApplicaitonMaster, MapReduce程序，MapReduce程序启动命令
+- Resource Manager使用调度器算法和应用程序管理器把MapReduce ApplicaitonMaster分发到服务器集群内的某台服务器上，并创建容器，MapReduce ApplicaitonMaster就在容器内，并启动MapReduce ApplicaitonMaster
+- 容器向Resource Manager注册，申请容器资源
+- Resource Manager把MapReduce程序，MapReduce程序启动命令分发给容器并运行
+- 如果运行结束，由MapReduce ApplicaitonMaster向Resource Manager申请注销容器进程，释放容器资源
+
+依赖倒置的例子在架构设计中随处可见。
+
+IIS这个Web容器、反向代理把请求交给MVC框架，它并不需要关系MVC怎么做，而是规范好实现一个叫HttpServlet的抽象类，而在MVC框架中定义了HttpServlet的具体实现。同样MVC框架也并不需要关系代码的执行，代码实现MVC的规范。
+
+
+同样比如在MVC的控制器中，不需要调用具体的类，而是依赖接口，至于接口的实现，交给接口的实现类。
+
+
