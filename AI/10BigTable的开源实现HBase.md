@@ -1,4 +1,4 @@
-Google在2004年发表了三篇论文，包括GFS, MapReduce, BigTable，GFS的开源实现是HDFS， MapReduce的开源实现是Hdoop MapReduce, BigTable的开源实现是HBase。
+Google在2004年发表了三篇论文，包括GFS, MapReduce, BigTable，GFS的开源实现是HDFS， MapReduce的开源实现是Hadoop MapReduce, BigTable的开源实现是HBase。
 
 HBase用来解决海量数据的存储与访问，是NoSQL, 非关系数据库，分布式。
 
