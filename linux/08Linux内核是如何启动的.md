@@ -1,0 +1,27 @@
+Lunux内核启动过程大致如下：
+
+- 主板上有一个ROM, Read Only Memory,是固化好的初始化程序，叫作BIOS，Basic Input and Output System, 刚装完操作系统调出的蓝色配置窗口，实际上就是配置BIOS，内存最上面的64k大小的空间留给了ROM, 系统启动后执行指令从内存拿到ROM地址启动BIOS程序
+- 按下计算机的启动按钮
+- 主板通电
+- CPU开始执行指令
+- IP指令寄存器的第一条指令时0XFFFF0，这条指令地址就是在ROM地址范围内
+- CPU给出JMP命令开始执行ROM中的BIOS
+- BIOS在启动盘的第一个扇区，占512个字节
+- 启动管理器Grub2, Grand Unified BootLoader Version2开始工作
+- Grub2的配置文件在grub2-mkconfig-o/boot/grub2/grub.cfg中
+- 安装boot.img镜像，由boot.S编译而成，
+- boot.img加载到内存0X7C00C开始运行
+- boot.img加载grub2的一个镜像core.img, core.img包括lzma_decompress.img, diskboot.img, kernel.img
+- core.img加载diskboot.img, 由disboot.S编译而成
+- core.img调用lzma_decompress.img
+- core.img调用real_to_port切换到保护模式
+- 在内存启用分断，在内存建立段描述，将寄存器里的段寄存器指向某个描述，这样允许多进程
+- 内存启动分页，把内存分成相等大小的块
+- 打开Gate A20,第21根address line,在实模式8080下，一共有20根地址线，访问1M空间，在保护模式下，21根线起作用， Data32 call real_to_port打开Gate A20
+- 对kernel.img解压缩
+- 跳转到kernel运行，由startup.S编译而成，调用grub_main函数，这时grub kernel的主函数，grub_load_config解析grub.conf文件，grub_command_execute, grub_nomal_exeucte, brub_show_menu显示那个选择操作系统的界面
+- 选择某个操作系统
+- 调用grub_menu_exuecute_entry开始解析执行，如果linux16, grub_cmd_linux被调用
+- 读取linux内核镜像头部一些数据放内存中
+- 如果检验通过读取整个linux内核镜像到内存
+- grub_command_exeucte("boot",0,0)真正开始启动linux内核
