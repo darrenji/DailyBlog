@@ -1,0 +1,1 @@
+进程和线程都被看作是task,以链表的形式存在。task的字段包括：pid, tgid, group-leader等。
