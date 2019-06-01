@@ -247,3 +247,8 @@ static async Task Main(string[] args)
     Console.ReadKey();
 }
 ```
+- 控制台请求如果用Fiddler捕获
+
+```
+grant_type=client_credetials&client_id=xxx&client_secret=xxx&scope=xxx
+```
