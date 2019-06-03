@@ -235,3 +235,103 @@ public class HomeController : Controller
     }
 }
 ```
+
+## 刷新token
+
+- 验证服务器这边默认是3600秒，可以重新设置
+```
+new Client{
+    AccessTokenLifetime = 60;
+}
+```
+- API资源的应用程序页需要设置
+```
+services.AddAuthentication("Bearer")
+    .AddJwtBearer("Bearer", optionos => {
+        options.TokenValidationParameters.RequrieExpirationTime = ture;
+        options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(1);
+    })
+```
+- 受保护的web应用程序
+```
+public async Task<IActionResult> Index()
+{
+    var client = new HttpClient();
+    var disco = await client.GetDiscoveryDocumentAsync("http://localhost:5000");
+    if(disco.IsError)
+    {
+        throw new Exception(disco.Error);
+    }
+
+    var accessToken = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.AcessToken);
+    client.SetBearerToken(accessToken);
+    var respone = await client.GetAsync("http://localhost:50001/identity");
+    if(!response.IsSuccessSatusCode)
+    {
+        if(response.StatusCode == HttpSatusCode.Unauthorized)
+        {
+            accessToken = await RenewTokenAsync();
+            return RedirectToAction();
+        }
+        throw new Exception(response.ReasonPhrase);
+    }
+
+    var conent = await response.Content.ReadAsStringAsync();
+    return View("Index", content);
+}
+
+private async Task<string> RenewTokenAsync()
+{
+    var calient = new HttpClient();
+
+    var disco
+
+    //获取当前refresh token
+    var refreshToken  = await HttpContext.GetTokenAsync(OpenIdConnectParameterNames.RefreshToken);
+
+    //拿着最新的refresh token获取各种token
+    var tokenResponse = await client.RequestRefreshTokenAsync(new RefreshTokenRequest{
+        Address= disco.TokenEndpoint,
+        ClientId,
+        Scoep,
+        ClientSecret,
+        GratyTypes = OpenIdConnectGrantTypes.RefreshToken,
+        RefreshToken = refreshToken
+    });
+
+    if(tokenResponse.IsError)
+    {
+
+    }
+
+    var expiresAt = DateTime.UtcNow + TimeSpan.FromSeconds(tokenResponse.ExpiresIn);
+
+    var tokens = new []{
+        new AuthenticationToken{
+            Name = OpenIdConnectParameterNames.IdToken,
+            Value = tokenResponse.IdentityToken
+        },
+        new AuthenticationToken{
+            Name = OpenIdConnectParaeterNames.AccessToken,
+            Value = tokenResponse.AccessToken
+        },
+        new AuthetnicationToken{
+            Name = OpenIdConnectParameterNames.RefreshToken,
+            Value = tokenResponse.RefreshToken
+        },
+        new AuthenticationToken{
+            Name = "expires_at",
+            Value = epiresAt.ToString("o", CultureInfo.InvariantCulture)
+        }
+    };
+
+    //重新验证
+    var currentAuthenticationResult = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    currentAuthenticationResult.Properties.StoreToken(tokens);
+
+    //重新登录
+    await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, currentAuthenticateResult.Principal, currentAuthenticateResult.Properties);
+
+    return tokenResponse.AccessToken;
+}
+```
